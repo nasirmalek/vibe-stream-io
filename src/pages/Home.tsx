@@ -5,8 +5,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { LogOut, User, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { iTunesApiService } from '@/services/iTunesApi';
-import { adaptITunesSongsToSongs } from '@/lib/songAdapter';
+import { YouTubeApiService } from '@/services/youtubeApi';
+import { adaptYouTubeSongsToSongs } from '@/lib/youtubeSongAdapter';
 import { toast } from 'sonner';
 
 const Home = () => {
@@ -21,14 +21,14 @@ const Home = () => {
       try {
         setIsLoading(true);
         
-        // Load featured tracks (pop/trending)
-        const featuredITunesSongs = await iTunesApiService.getTopSongs('pop', 12);
-        const featured = adaptITunesSongsToSongs(featuredITunesSongs);
+        // Load featured tracks (trending music)
+        const featuredYtSongs = await YouTubeApiService.searchSongs('top music 2024 hits', 12);
+        const featured = adaptYouTubeSongsToSongs(featuredYtSongs);
         setFeaturedSongs(featured.slice(0, 6));
         
-        // Load popular tracks (different genre mix)
-        const popularITunesSongs = await iTunesApiService.getTopSongs('rock', 10);
-        const popular = adaptITunesSongsToSongs(popularITunesSongs);
+        // Load popular tracks (popular songs)
+        const popularYtSongs = await YouTubeApiService.searchSongs('popular songs 2024', 10);
+        const popular = adaptYouTubeSongsToSongs(popularYtSongs);
         setPopularSongs(popular.slice(0, 5));
       } catch (error) {
         console.error('Error loading songs:', error);

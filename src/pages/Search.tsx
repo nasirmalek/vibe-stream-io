@@ -3,8 +3,8 @@ import { Search as SearchIcon, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { SongCard } from '@/components/SongCard';
 import { Song } from '@/lib/mockData';
-import { iTunesApiService } from '@/services/iTunesApi';
-import { adaptITunesSongsToSongs } from '@/lib/songAdapter';
+import { YouTubeApiService } from '@/services/youtubeApi';
+import { adaptYouTubeSongsToSongs } from '@/lib/youtubeSongAdapter';
 import { toast } from 'sonner';
 
 const Search = () => {
@@ -18,8 +18,8 @@ const Search = () => {
   useEffect(() => {
     const loadBrowseSongs = async () => {
       try {
-        const iTunesSongs = await iTunesApiService.getTopSongs('pop', 24);
-        const adapted = adaptITunesSongsToSongs(iTunesSongs);
+        const ytSongs = await YouTubeApiService.searchSongs('top hits 2024', 24);
+        const adapted = adaptYouTubeSongsToSongs(ytSongs);
         setBrowseSongs(adapted);
       } catch (error) {
         console.error('Error loading browse songs:', error);
@@ -42,8 +42,8 @@ const Search = () => {
     const timeoutId = setTimeout(async () => {
       setIsSearching(true);
       try {
-        const iTunesSongs = await iTunesApiService.searchSongs(searchQuery, 50);
-        const adapted = adaptITunesSongsToSongs(iTunesSongs);
+        const ytSongs = await YouTubeApiService.searchSongs(searchQuery, 50);
+        const adapted = adaptYouTubeSongsToSongs(ytSongs);
         setSongs(adapted);
       } catch (error) {
         console.error('Error searching songs:', error);

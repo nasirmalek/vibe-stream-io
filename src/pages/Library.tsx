@@ -6,8 +6,8 @@ import { Song, mockPlaylists } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { iTunesApiService } from '@/services/iTunesApi';
-import { adaptITunesSongsToSongs } from '@/lib/songAdapter';
+import { YouTubeApiService } from '@/services/youtubeApi';
+import { adaptYouTubeSongsToSongs } from '@/lib/youtubeSongAdapter';
 import { toast } from 'sonner';
 
 const Library = () => {
@@ -20,8 +20,8 @@ const Library = () => {
     const loadLibrarySongs = async () => {
       try {
         // Load user's library songs (for demo, load recommended songs)
-        const iTunesSongs = await iTunesApiService.getRecommendations();
-        const adapted = adaptITunesSongsToSongs(iTunesSongs);
+        const ytSongs = await YouTubeApiService.searchSongs('music recommendations', 25);
+        const adapted = adaptYouTubeSongsToSongs(ytSongs);
         setLibrarySongs(adapted);
       } catch (error) {
         console.error('Error loading library:', error);

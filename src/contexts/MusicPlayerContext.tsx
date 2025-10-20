@@ -16,6 +16,7 @@ interface MusicPlayerContextType {
   seek: (time: number) => void;
   addToQueue: (song: Song) => void;
   setQueue: (songs: Song[]) => void;
+  playerRef: React.MutableRefObject<any>;
 }
 
 const MusicPlayerContext = createContext<MusicPlayerContextType | undefined>(undefined);
@@ -28,51 +29,58 @@ export const useMusicPlayer = () => {
   return context;
 };
 
+declare global {
+  interface Window {
+    YT: any;
+    onYouTubeIframeAPIReady: () => void;
+  }
+}
+
 export const MusicPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolumeState] = useState(0.7);
+  const [volume, setVolumeState] = useState(70);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [queue, setQueue] = useState<Song[]>([]);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const playerRef = useRef<any>(null);
+  const intervalRef = useRef<number | null>(null);
 
+  // Load YouTube IFrame API
   useEffect(() => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio();
-      audioRef.current.volume = volume;
-
-      audioRef.current.addEventListener('loadedmetadata', () => {
-        setDuration(audioRef.current?.duration || 0);
-      });
-
-      audioRef.current.addEventListener('timeupdate', () => {
-        setCurrentTime(audioRef.current?.currentTime || 0);
-      });
-
-      audioRef.current.addEventListener('ended', () => {
-        nextSong();
-      });
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
     }
   }, []);
 
+  const getVideoId = (url: string): string => {
+    const match = url.match(/[?&]v=([^&]+)/);
+    return match ? match[1] : url;
+  };
+
   const playSong = (song: Song) => {
-    if (audioRef.current) {
-      setCurrentSong(song);
-      audioRef.current.src = song.audioUrl;
-      audioRef.current.play();
+    setCurrentSong(song);
+    const videoId = getVideoId(song.audioUrl);
+    
+    if (playerRef.current && playerRef.current.loadVideoById) {
+      playerRef.current.loadVideoById(videoId);
+      playerRef.current.setVolume(volume);
       setIsPlaying(true);
     }
   };
 
   const togglePlay = () => {
-    if (audioRef.current && currentSong) {
+    if (playerRef.current && currentSong) {
       if (isPlaying) {
-        audioRef.current.pause();
+        playerRef.current.pauseVideo();
+        setIsPlaying(false);
       } else {
-        audioRef.current.play();
+        playerRef.current.playVideo();
+        setIsPlaying(true);
       }
-      setIsPlaying(!isPlaying);
     }
   };
 
@@ -81,6 +89,8 @@ export const MusicPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       const currentIndex = queue.findIndex(s => s.id === currentSong.id);
       if (currentIndex < queue.length - 1) {
         playSong(queue[currentIndex + 1]);
+      } else {
+        setIsPlaying(false);
       }
     }
   };
@@ -96,14 +106,14 @@ export const MusicPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   const setVolume = (newVolume: number) => {
     setVolumeState(newVolume);
-    if (audioRef.current) {
-      audioRef.current.volume = newVolume;
+    if (playerRef.current && playerRef.current.setVolume) {
+      playerRef.current.setVolume(newVolume);
     }
   };
 
   const seek = (time: number) => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = time;
+    if (playerRef.current && playerRef.current.seekTo) {
+      playerRef.current.seekTo(time, true);
       setCurrentTime(time);
     }
   };
@@ -111,6 +121,30 @@ export const MusicPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const addToQueue = (song: Song) => {
     setQueue(prev => [...prev, song]);
   };
+
+  // Update current time and duration
+  useEffect(() => {
+    if (isPlaying && playerRef.current) {
+      intervalRef.current = window.setInterval(() => {
+        if (playerRef.current && playerRef.current.getCurrentTime) {
+          const current = playerRef.current.getCurrentTime();
+          const dur = playerRef.current.getDuration();
+          setCurrentTime(current);
+          setDuration(dur);
+        }
+      }, 100);
+    } else {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [isPlaying]);
 
   return (
     <MusicPlayerContext.Provider
@@ -129,6 +163,7 @@ export const MusicPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         seek,
         addToQueue,
         setQueue,
+        playerRef,
       }}
     >
       {children}

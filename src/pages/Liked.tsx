@@ -5,8 +5,8 @@ import { Song } from '@/lib/mockData';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { iTunesApiService } from '@/services/iTunesApi';
-import { adaptITunesSongsToSongs } from '@/lib/songAdapter';
+import { YouTubeApiService } from '@/services/youtubeApi';
+import { adaptYouTubeSongsToSongs } from '@/lib/youtubeSongAdapter';
 import { toast } from 'sonner';
 
 const Liked = () => {
@@ -19,8 +19,8 @@ const Liked = () => {
     const loadLikedSongs = async () => {
       try {
         // For demo, load some favorite tracks
-        const iTunesSongs = await iTunesApiService.searchSongs('love', 8);
-        const adapted = adaptITunesSongsToSongs(iTunesSongs);
+        const ytSongs = await YouTubeApiService.searchSongs('favorite songs', 12);
+        const adapted = adaptYouTubeSongsToSongs(ytSongs);
         setLikedSongs(adapted);
       } catch (error) {
         console.error('Error loading liked songs:', error);
