@@ -1,15 +1,40 @@
-import { useState } from 'react';
-import { Music, ListMusic } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Music, ListMusic, Loader2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SongCard } from '@/components/SongCard';
-import { mockSongs, mockPlaylists } from '@/lib/mockData';
+import { Song, mockPlaylists } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { iTunesApiService } from '@/services/iTunesApi';
+import { adaptITunesSongsToSongs } from '@/lib/songAdapter';
+import { toast } from 'sonner';
 
 const Library = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [librarySongs, setLibrarySongs] = useState<Song[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadLibrarySongs = async () => {
+      try {
+        // Load user's library songs (for demo, load recommended songs)
+        const iTunesSongs = await iTunesApiService.getRecommendations();
+        const adapted = adaptITunesSongsToSongs(iTunesSongs);
+        setLibrarySongs(adapted);
+      } catch (error) {
+        console.error('Error loading library:', error);
+        toast.error('Failed to load library');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (user) {
+      loadLibrarySongs();
+    }
+  }, [user]);
 
   if (!user) {
     return (
@@ -72,11 +97,17 @@ const Library = () => {
           </TabsContent>
 
           <TabsContent value="songs">
-            <div className="space-y-2">
-              {mockSongs.map((song) => (
-                <SongCard key={song.id} song={song} compact />
-              ))}
-            </div>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {librarySongs.map((song) => (
+                  <SongCard key={song.id} song={song} compact />
+                ))}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>

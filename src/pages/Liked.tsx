@@ -1,13 +1,39 @@
-import { Heart } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Heart, Loader2 } from 'lucide-react';
 import { SongCard } from '@/components/SongCard';
-import { mockSongs } from '@/lib/mockData';
+import { Song } from '@/lib/mockData';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { iTunesApiService } from '@/services/iTunesApi';
+import { adaptITunesSongsToSongs } from '@/lib/songAdapter';
+import { toast } from 'sonner';
 
 const Liked = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [likedSongs, setLikedSongs] = useState<Song[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadLikedSongs = async () => {
+      try {
+        // For demo, load some favorite tracks
+        const iTunesSongs = await iTunesApiService.searchSongs('love', 8);
+        const adapted = adaptITunesSongsToSongs(iTunesSongs);
+        setLikedSongs(adapted);
+      } catch (error) {
+        console.error('Error loading liked songs:', error);
+        toast.error('Failed to load liked songs');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (user) {
+      loadLikedSongs();
+    }
+  }, [user]);
 
   if (!user) {
     return (
@@ -25,9 +51,6 @@ const Liked = () => {
     );
   }
 
-  // For demo, show first 4 songs as "liked"
-  const likedSongs = mockSongs.slice(0, 4);
-
   return (
     <div className="min-h-screen pb-28">
       {/* Header */}
@@ -40,14 +63,18 @@ const Liked = () => {
             <p className="text-sm mb-2">Playlist</p>
             <h1 className="text-6xl font-bold mb-4">Liked Songs</h1>
             <p className="text-accent-foreground/80">
-              {likedSongs.length} {likedSongs.length === 1 ? 'song' : 'songs'}
+              {isLoading ? 'Loading...' : `${likedSongs.length} ${likedSongs.length === 1 ? 'song' : 'songs'}`}
             </p>
           </div>
         </div>
       </div>
 
       <div className="px-8">
-        {likedSongs.length > 0 ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : likedSongs.length > 0 ? (
           <div className="space-y-2">
             {likedSongs.map((song) => (
               <SongCard key={song.id} song={song} compact />
