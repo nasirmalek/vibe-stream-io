@@ -5,8 +5,7 @@ import { Song } from '@/lib/mockData';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { YouTubeApiService } from '@/services/youtubeApi';
-import { adaptYouTubeSongsToSongs } from '@/lib/youtubeSongAdapter';
+import { likedSongsService } from '@/lib/playlistService';
 import { toast } from 'sonner';
 
 const Liked = () => {
@@ -16,24 +15,23 @@ const Liked = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadLikedSongs = async () => {
-      try {
-        // For demo, load some favorite tracks
-        const ytSongs = await YouTubeApiService.searchSongs('favorite songs', 12);
-        const adapted = adaptYouTubeSongsToSongs(ytSongs);
-        setLikedSongs(adapted);
-      } catch (error) {
-        console.error('Error loading liked songs:', error);
-        toast.error('Failed to load liked songs');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     if (user) {
       loadLikedSongs();
     }
   }, [user]);
+
+  const loadLikedSongs = async () => {
+    try {
+      setIsLoading(true);
+      const songs = await likedSongsService.getLikedSongs();
+      setLikedSongs(songs);
+    } catch (error) {
+      console.error('Error loading liked songs:', error);
+      toast.error('Failed to load liked songs');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   if (!user) {
     return (

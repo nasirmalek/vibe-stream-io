@@ -1,8 +1,12 @@
-import { Play, MoreVertical } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Play, MoreVertical, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Song, formatDuration } from '@/lib/mockData';
 import { useMusicPlayer } from '@/contexts/MusicPlayerContext';
 import { cn } from '@/lib/utils';
+import { likedSongsService } from '@/lib/playlistService';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 interface SongCardProps {
   song: Song;
@@ -12,14 +16,58 @@ interface SongCardProps {
 
 export const SongCard = ({ song, showCover = true, compact = false }: SongCardProps) => {
   const { playSong, currentSong, isPlaying, setQueue, queue } = useMusicPlayer();
+  const { user } = useAuth();
+  const [isLiked, setIsLiked] = useState(false);
+  const [liking, setLiking] = useState(false);
 
   const isCurrentSong = currentSong?.id === song.id;
+
+  useEffect(() => {
+    if (user) {
+      checkIfLiked();
+    }
+  }, [song.id, user]);
+
+  const checkIfLiked = async () => {
+    try {
+      const liked = await likedSongsService.isSongLiked(song.id);
+      setIsLiked(liked);
+    } catch (error) {
+      console.error('Error checking like status:', error);
+    }
+  };
 
   const handlePlay = () => {
     if (!queue.find(s => s.id === song.id)) {
       setQueue([song]);
     }
     playSong(song);
+  };
+
+  const handleLike = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) {
+      toast.error('Please sign in to like songs');
+      return;
+    }
+
+    setLiking(true);
+    try {
+      if (isLiked) {
+        await likedSongsService.unlikeSong(song.id);
+        setIsLiked(false);
+        toast.success('Removed from liked songs');
+      } else {
+        await likedSongsService.likeSong(song);
+        setIsLiked(true);
+        toast.success('Added to liked songs');
+      }
+    } catch (error: any) {
+      console.error('Error toggling like:', error);
+      toast.error(error.message || 'Failed to update like status');
+    } finally {
+      setLiking(false);
+    }
   };
 
   if (compact) {
@@ -49,10 +97,24 @@ export const SongCard = ({ song, showCover = true, compact = false }: SongCardPr
           </p>
           <p className="text-sm text-muted-foreground truncate">{song.artist}</p>
         </div>
-        <span className="text-sm text-muted-foreground">{formatDuration(song.duration)}</span>
-        <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100">
-          <MoreVertical className="w-4 h-4" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">{formatDuration(song.duration)}</span>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleLike}
+            disabled={liking}
+            className={cn(
+              'transition-all',
+              isLiked ? 'text-primary' : 'opacity-0 group-hover:opacity-100'
+            )}
+          >
+            <Heart className={cn('w-4 h-4', isLiked && 'fill-current')} />
+          </Button>
+          <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100">
+            <MoreVertical className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
     );
   }
@@ -65,6 +127,7 @@ export const SongCard = ({ song, showCover = true, compact = false }: SongCardPr
           alt={song.title}
           className="w-full aspect-square object-cover rounded-lg"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-lg" />
         <Button
           size="icon"
           onClick={handlePlay}
@@ -75,6 +138,18 @@ export const SongCard = ({ song, showCover = true, compact = false }: SongCardPr
           )}
         >
           <Play className="w-5 h-5" fill="currentColor" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleLike}
+          disabled={liking}
+          className={cn(
+            'absolute top-2 right-2 w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 transition-all',
+            isLiked ? 'opacity-100 text-primary' : 'opacity-0 group-hover:opacity-100'
+          )}
+        >
+          <Heart className={cn('w-5 h-5', isLiked && 'fill-current')} />
         </Button>
       </div>
       <h3 className="font-semibold truncate mb-1">{song.title}</h3>

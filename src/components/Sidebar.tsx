@@ -1,9 +1,10 @@
-import { Home, Search, Library, Plus, Heart, Menu, X } from 'lucide-react';
+import { Home, Search, Library, Heart, Menu } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { CreatePlaylistDialog } from './CreatePlaylistDialog';
 import logo from '@/assets/logo.png';
 
 export const Sidebar = () => {
@@ -61,10 +62,7 @@ export const Sidebar = () => {
       </nav>
 
       <div className="p-4 border-t border-border">
-        <Button variant="outline" size="sm" className="w-full">
-          <Plus className="w-4 h-4 mr-2" />
-          Create Playlist
-        </Button>
+        <CreatePlaylistDialog onPlaylistCreated={() => setOpen(false)} />
       </div>
     </>
   );
