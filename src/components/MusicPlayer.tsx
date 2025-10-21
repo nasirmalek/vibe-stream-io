@@ -81,42 +81,42 @@ export const MusicPlayer = () => {
   return (
     <>
       <div id="youtube-player" style={{ display: 'none' }}></div>
-      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border px-4 py-3">
-        <div className="flex items-center gap-4">
+      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border px-2 sm:px-4 py-2 sm:py-3 z-50">
+        <div className="flex items-center gap-2 sm:gap-4">
           {/* Song Info */}
-          <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
             <img
               src={currentSong.coverUrl}
               alt={currentSong.title}
-              className="w-14 h-14 rounded-lg object-cover shadow-card"
+              className="w-10 h-10 sm:w-14 sm:h-14 rounded-lg object-cover shadow-card"
             />
-            <div className="min-w-0 flex-1">
-              <p className="font-semibold text-foreground truncate">{currentSong.title}</p>
-              <p className="text-sm text-muted-foreground truncate">{currentSong.artist}</p>
+            <div className="min-w-0 flex-1 hidden sm:block">
+              <p className="font-semibold text-foreground truncate text-sm">{currentSong.title}</p>
+              <p className="text-xs text-muted-foreground truncate">{currentSong.artist}</p>
             </div>
           </div>
 
           {/* Player Controls */}
-          <div className="flex flex-col items-center flex-[2] gap-2">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col items-center flex-[2] gap-1 sm:gap-2">
+            <div className="flex items-center gap-2 sm:gap-4">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={previousSong}
-                className="hover:bg-primary/10"
+                className="hover:bg-primary/10 h-8 w-8 sm:h-10 sm:w-10"
               >
-                <SkipBack className="w-5 h-5" />
+                <SkipBack className="w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
 
               <Button
                 size="icon"
                 onClick={togglePlay}
-                className="w-10 h-10 rounded-full bg-primary hover:bg-primary/90 shadow-glow"
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary hover:bg-primary/90 shadow-glow"
               >
                 {isPlaying ? (
-                  <Pause className="w-5 h-5" fill="currentColor" />
+                  <Pause className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" />
                 ) : (
-                  <Play className="w-5 h-5" fill="currentColor" />
+                  <Play className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" />
                 )}
               </Button>
 
@@ -124,14 +124,14 @@ export const MusicPlayer = () => {
                 variant="ghost"
                 size="icon"
                 onClick={nextSong}
-                className="hover:bg-primary/10"
+                className="hover:bg-primary/10 h-8 w-8 sm:h-10 sm:w-10"
               >
-                <SkipForward className="w-5 h-5" />
+                <SkipForward className="w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
             </div>
 
             {/* Progress Bar */}
-            <div className="flex items-center gap-2 w-full max-w-lg">
+            <div className="hidden sm:flex items-center gap-2 w-full max-w-lg">
               <span className="text-xs text-muted-foreground w-10 text-right">
                 {formatDuration(Math.floor(currentTime))}
               </span>
@@ -149,7 +149,7 @@ export const MusicPlayer = () => {
           </div>
 
           {/* Volume Control */}
-          <div className="flex items-center gap-2 flex-1 justify-end">
+          <div className="hidden md:flex items-center gap-2 flex-1 justify-end">
             <Button
               variant="ghost"
               size="icon"

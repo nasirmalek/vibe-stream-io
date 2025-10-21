@@ -6,8 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Music } from 'lucide-react';
 import { z } from 'zod';
+import logo from '@/assets/logo.png';
 
 const passwordSchema = z.string()
   .min(8, 'Password must be at least 8 characters')
@@ -79,25 +79,23 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full gradient-primary mb-4">
-            <Music className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold mb-2">Welcome to MusicFlow</h1>
-          <p className="text-muted-foreground">Sign in to continue listening</p>
+        <div className="text-center mb-6 sm:mb-8">
+          <img src={logo} alt="VibeStream" className="h-16 sm:h-20 w-auto mx-auto mb-4" />
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2">Welcome to VibeStream</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Sign in to continue listening</p>
         </div>
 
-        <div className="bg-card p-8 rounded-xl shadow-card">
+        <div className="bg-card p-4 sm:p-6 lg:p-8 rounded-xl shadow-card">
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6">
+              <TabsTrigger value="signin" className="text-sm">Sign In</TabsTrigger>
+              <TabsTrigger value="signup" className="text-sm">Sign Up</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
+                  <Label htmlFor="signin-email" className="text-sm">Email</Label>
                   <Input
                     id="signin-email"
                     type="email"
@@ -109,7 +107,7 @@ const Auth = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
+                  <Label htmlFor="signin-password" className="text-sm">Password</Label>
                   <Input
                     id="signin-password"
                     type="password"
@@ -133,7 +131,7 @@ const Auth = () => {
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
+                  <Label htmlFor="signup-email" className="text-sm">Email</Label>
                   <Input
                     id="signup-email"
                     type="email"
@@ -145,7 +143,7 @@ const Auth = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
+                  <Label htmlFor="signup-password" className="text-sm">Password</Label>
                   <Input
                     id="signup-password"
                     type="password"

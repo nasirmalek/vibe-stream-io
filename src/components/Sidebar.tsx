@@ -1,21 +1,23 @@
-import { Home, Search, Library, Plus, Heart } from 'lucide-react';
+import { Home, Search, Library, Plus, Heart, Menu, X } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import logo from '@/assets/logo.png';
 
 export const Sidebar = () => {
+  const [open, setOpen] = useState(false);
   const navLinks = [
     { to: '/', icon: Home, label: 'Home' },
     { to: '/search', icon: Search, label: 'Search' },
     { to: '/library', icon: Library, label: 'Your Library' },
   ];
 
-  return (
-    <aside className="w-64 bg-card border-r border-border flex flex-col h-screen">
+  const SidebarContent = () => (
+    <>
       <div className="p-6">
-        <h1 className="text-2xl font-bold gradient-primary bg-clip-text text-transparent">
-          MusicFlow
-        </h1>
+        <img src={logo} alt="VibeStream" className="h-12 w-auto" />
       </div>
 
       <nav className="flex-1 px-3 space-y-1">
@@ -24,6 +26,7 @@ export const Sidebar = () => {
             key={link.to}
             to={link.to}
             end
+            onClick={() => setOpen(false)}
             className={({ isActive }) =>
               cn(
                 'flex items-center gap-3 px-4 py-3 rounded-lg transition-smooth',
@@ -41,6 +44,7 @@ export const Sidebar = () => {
         <div className="pt-4 space-y-1">
           <NavLink
             to="/liked"
+            onClick={() => setOpen(false)}
             className={({ isActive }) =>
               cn(
                 'flex items-center gap-3 px-4 py-3 rounded-lg transition-smooth',
@@ -62,6 +66,30 @@ export const Sidebar = () => {
           Create Playlist
         </Button>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile Header with Menu */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 bg-card border-b border-border z-40 px-4 py-3 flex items-center justify-between">
+        <img src={logo} alt="VibeStream" className="h-8 w-auto" />
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <Menu className="w-6 h-6" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-64 p-0">
+            <SidebarContent />
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:flex w-64 bg-card border-r border-border flex-col h-screen">
+        <SidebarContent />
+      </aside>
+    </>
   );
 };
