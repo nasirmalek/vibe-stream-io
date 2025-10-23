@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { MusicPlayerProvider } from "@/contexts/MusicPlayerContext";
 import { Sidebar } from "@/components/Sidebar";
 import { MusicPlayer } from "@/components/MusicPlayer";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Home from "./pages/Home";
 import Search from "./pages/Search";
 import Library from "./pages/Library";
@@ -29,12 +30,12 @@ const App = () => (
               <Sidebar />
               <main className="flex-1 overflow-y-auto">
                 <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/search" element={<Search />} />
-                  <Route path="/library" element={<Library />} />
-                  <Route path="/liked" element={<Liked />} />
+                  <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+                  <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
+                  <Route path="/library" element={<ProtectedRoute><Library /></ProtectedRoute>} />
+                  <Route path="/liked" element={<ProtectedRoute><Liked /></ProtectedRoute>} />
                   <Route path="/auth" element={<Auth />} />
-                  <Route path="/now-playing" element={<NowPlaying />} />
+                  <Route path="/now-playing" element={<ProtectedRoute><NowPlaying /></ProtectedRoute>} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
