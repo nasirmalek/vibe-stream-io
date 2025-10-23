@@ -1,0 +1,324 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ChevronDown, Heart, Shuffle, Repeat, Play, Pause, SkipBack, SkipForward, MoreVertical } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useMusicPlayer } from '@/contexts/MusicPlayerContext';
+import { formatDuration } from '@/lib/mockData';
+import { fetchLyrics, LyricsResponse } from '@/services/lyricsApi';
+import { likedSongsService } from '@/lib/playlistService';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+
+const NowPlaying = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const {
+    currentSong,
+    isPlaying,
+    currentTime,
+    duration,
+    togglePlay,
+    nextSong,
+    previousSong,
+    seek,
+    queue,
+  } = useMusicPlayer();
+
+  const [lyrics, setLyrics] = useState<LyricsResponse>({ lyrics: null });
+  const [isLoadingLyrics, setIsLoadingLyrics] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isShuffleOn, setIsShuffleOn] = useState(false);
+  const [repeatMode, setRepeatMode] = useState<'off' | 'all' | 'one'>('off');
+
+  useEffect(() => {
+    if (currentSong) {
+      loadLyrics();
+      checkIfLiked();
+    }
+  }, [currentSong?.id]);
+
+  const loadLyrics = async () => {
+    if (!currentSong) return;
+    
+    setIsLoadingLyrics(true);
+    const result = await fetchLyrics(currentSong.artist, currentSong.title);
+    setLyrics(result);
+    setIsLoadingLyrics(false);
+  };
+
+  const checkIfLiked = async () => {
+    if (!user || !currentSong) return;
+    try {
+      const liked = await likedSongsService.isSongLiked(currentSong.id);
+      setIsLiked(liked);
+    } catch (error) {
+      console.error('Error checking like status:', error);
+    }
+  };
+
+  const handleLike = async () => {
+    if (!user || !currentSong) {
+      toast.error('Please sign in to like songs');
+      return;
+    }
+
+    try {
+      if (isLiked) {
+        await likedSongsService.unlikeSong(currentSong.id);
+        setIsLiked(false);
+        toast.success('Removed from liked songs');
+      } else {
+        await likedSongsService.likeSong(currentSong);
+        setIsLiked(true);
+        toast.success('Added to liked songs');
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update like status');
+    }
+  };
+
+  const handleSeek = (value: number[]) => {
+    seek(value[0]);
+  };
+
+  const toggleRepeat = () => {
+    setRepeatMode(prev => {
+      if (prev === 'off') return 'all';
+      if (prev === 'all') return 'one';
+      return 'off';
+    });
+  };
+
+  if (!currentSong) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-background">
+        <div className="text-center">
+          <p className="text-xl text-muted-foreground">No song playing</p>
+          <Button onClick={() => navigate('/')} className="mt-4">
+            Go Home
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-primary/20 via-background to-background pb-8">
+      {/* Header */}
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-lg border-b border-border">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="hover:bg-primary/10"
+          >
+            <ChevronDown className="w-6 h-6" />
+          </Button>
+          <div className="text-center flex-1">
+            <p className="text-sm text-muted-foreground">Playing from</p>
+            <p className="font-semibold">Queue</p>
+          </div>
+          <Button variant="ghost" size="icon" className="hover:bg-primary/10">
+            <MoreVertical className="w-6 h-6" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
+            {/* Left: Album Art & Controls */}
+            <div className="flex flex-col items-center space-y-8">
+              {/* Album Art */}
+              <div className="relative w-full max-w-md aspect-square">
+                <img
+                  src={currentSong.coverUrl}
+                  alt={currentSong.title}
+                  className="w-full h-full object-cover rounded-2xl shadow-2xl"
+                />
+              </div>
+
+              {/* Song Info & Like */}
+              <div className="w-full max-w-md flex items-start justify-between">
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-2xl md:text-3xl font-bold truncate mb-2">
+                    {currentSong.title}
+                  </h1>
+                  <p className="text-lg text-muted-foreground truncate">
+                    {currentSong.artist}
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleLike}
+                  className={cn(
+                    'ml-4 hover:bg-primary/10 transition-all',
+                    isLiked && 'text-primary'
+                  )}
+                >
+                  <Heart className={cn('w-7 h-7', isLiked && 'fill-current')} />
+                </Button>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="w-full max-w-md space-y-2">
+                <Slider
+                  value={[currentTime]}
+                  max={duration}
+                  step={1}
+                  onValueChange={handleSeek}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>{formatDuration(Math.floor(currentTime))}</span>
+                  <span>{formatDuration(Math.floor(duration))}</span>
+                </div>
+              </div>
+
+              {/* Controls */}
+              <div className="w-full max-w-md flex items-center justify-between">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsShuffleOn(!isShuffleOn)}
+                  className={cn(
+                    'hover:bg-primary/10',
+                    isShuffleOn && 'text-primary'
+                  )}
+                >
+                  <Shuffle className="w-5 h-5" />
+                </Button>
+
+                <div className="flex items-center gap-4">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={previousSong}
+                    className="hover:bg-primary/10 w-12 h-12"
+                  >
+                    <SkipBack className="w-6 h-6" />
+                  </Button>
+
+                  <Button
+                    size="icon"
+                    onClick={togglePlay}
+                    className="w-16 h-16 rounded-full bg-primary hover:bg-primary/90 shadow-glow"
+                  >
+                    {isPlaying ? (
+                      <Pause className="w-8 h-8" fill="currentColor" />
+                    ) : (
+                      <Play className="w-8 h-8" fill="currentColor" />
+                    )}
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={nextSong}
+                    className="hover:bg-primary/10 w-12 h-12"
+                  >
+                    <SkipForward className="w-6 h-6" />
+                  </Button>
+                </div>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleRepeat}
+                  className={cn(
+                    'hover:bg-primary/10 relative',
+                    repeatMode !== 'off' && 'text-primary'
+                  )}
+                >
+                  <Repeat className="w-5 h-5" />
+                  {repeatMode === 'one' && (
+                    <span className="absolute text-xs font-bold top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                      1
+                    </span>
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            {/* Right: Lyrics & Queue */}
+            <div className="w-full">
+              <Tabs defaultValue="lyrics" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-6">
+                  <TabsTrigger value="lyrics">Lyrics</TabsTrigger>
+                  <TabsTrigger value="queue">Queue ({queue.length})</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="lyrics" className="mt-0">
+                  <ScrollArea className="h-[500px] lg:h-[600px] rounded-lg border bg-card p-6">
+                    {isLoadingLyrics ? (
+                      <div className="flex items-center justify-center h-full">
+                        <p className="text-muted-foreground">Loading lyrics...</p>
+                      </div>
+                    ) : lyrics.lyrics ? (
+                      <pre className="whitespace-pre-wrap font-sans text-base leading-relaxed">
+                        {lyrics.lyrics}
+                      </pre>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full text-center">
+                        <p className="text-muted-foreground mb-2">
+                          Lyrics not available for this song
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {lyrics.error}
+                        </p>
+                      </div>
+                    )}
+                  </ScrollArea>
+                </TabsContent>
+
+                <TabsContent value="queue" className="mt-0">
+                  <ScrollArea className="h-[500px] lg:h-[600px] rounded-lg border bg-card">
+                    <div className="p-2">
+                      {queue.map((song, index) => (
+                        <div
+                          key={`${song.id}-${index}`}
+                          className={cn(
+                            'flex items-center gap-3 p-3 rounded-lg hover:bg-secondary/50 transition-smooth cursor-pointer',
+                            currentSong.id === song.id && 'bg-primary/10'
+                          )}
+                        >
+                          <img
+                            src={song.coverUrl}
+                            alt={song.title}
+                            className="w-12 h-12 rounded object-cover"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className={cn(
+                              'font-medium truncate',
+                              currentSong.id === song.id && 'text-primary'
+                            )}>
+                              {song.title}
+                            </p>
+                            <p className="text-sm text-muted-foreground truncate">
+                              {song.artist}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+              </Tabs>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default NowPlaying;

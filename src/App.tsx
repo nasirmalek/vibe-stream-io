@@ -12,6 +12,7 @@ import Search from "./pages/Search";
 import Library from "./pages/Library";
 import Liked from "./pages/Liked";
 import Auth from "./pages/Auth";
+import NowPlaying from "./pages/NowPlaying";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
                   <Route path="/library" element={<Library />} />
                   <Route path="/liked" element={<Liked />} />
                   <Route path="/auth" element={<Auth />} />
+                  <Route path="/now-playing" element={<NowPlaying />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>

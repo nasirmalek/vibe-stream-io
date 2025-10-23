@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -13,6 +14,7 @@ declare global {
 }
 
 export const MusicPlayer = () => {
+  const navigate = useNavigate();
   const {
     currentSong,
     isPlaying,
@@ -83,8 +85,11 @@ export const MusicPlayer = () => {
       <div id="youtube-player" style={{ display: 'none' }}></div>
       <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border px-2 sm:px-4 py-2 sm:py-3 z-50">
         <div className="flex items-center gap-2 sm:gap-4">
-          {/* Song Info */}
-          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+          {/* Song Info - Clickable */}
+          <div 
+            className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 cursor-pointer hover:bg-secondary/50 rounded-lg p-1 transition-smooth"
+            onClick={() => navigate('/now-playing')}
+          >
             <img
               src={currentSong.coverUrl}
               alt={currentSong.title}
