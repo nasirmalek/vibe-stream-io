@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { z } from 'zod';
 import logo from '@/assets/logo.png';
+import { ApiKeyDialog } from '@/components/ApiKeyDialog';
 
 const passwordSchema = z.string()
   .min(8, 'Password must be at least 8 characters')
@@ -19,12 +20,21 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showApiKeyDialog, setShowApiKeyDialog] = useState(false);
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
-      navigate('/');
+      // Check if API key is already set or skipped
+      const hasApiKey = localStorage.getItem('youtube_api_key');
+      const skipped = localStorage.getItem('youtube_api_key_skipped');
+      
+      if (!hasApiKey && !skipped) {
+        setShowApiKeyDialog(true);
+      } else {
+        navigate('/');
+      }
     }
   }, [user, navigate]);
 
@@ -38,7 +48,7 @@ const Auth = () => {
         toast.error(error.message);
       } else {
         toast.success('Welcome back!');
-        navigate('/');
+        // Dialog will show via useEffect
       }
     } catch (error: any) {
       toast.error('An error occurred during sign in');
@@ -169,6 +179,14 @@ const Auth = () => {
             </TabsContent>
           </Tabs>
         </div>
+
+        <ApiKeyDialog 
+          open={showApiKeyDialog} 
+          onOpenChange={(open) => {
+            setShowApiKeyDialog(open);
+            if (!open) navigate('/');
+          }} 
+        />
       </div>
     </div>
   );

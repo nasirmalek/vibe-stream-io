@@ -10,7 +10,7 @@ export const fetchLyrics = async (artist: string, title: string): Promise<Lyrics
     const cleanTitle = title.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').trim();
     
     const response = await fetch(
-      `https://api.lyrics.ovh/v1/${encodeURIComponent(cleanArtist)}/${encodeURIComponent(cleanTitle)}`
+      `https://lrclib.net/api/get?artist_name=${encodeURIComponent(cleanArtist)}&track_name=${encodeURIComponent(cleanTitle)}`
     );
     
     if (!response.ok) {
@@ -18,7 +18,9 @@ export const fetchLyrics = async (artist: string, title: string): Promise<Lyrics
     }
     
     const data = await response.json();
-    return { lyrics: data.lyrics || null };
+    // lrclib returns syncedLyrics (with timestamps) and plainLyrics
+    const lyrics = data.syncedLyrics || data.plainLyrics || null;
+    return { lyrics };
   } catch (error) {
     console.error('Error fetching lyrics:', error);
     return { lyrics: null, error: 'Failed to fetch lyrics' };

@@ -1,5 +1,3 @@
-import { supabase } from '@/integrations/supabase/client';
-
 export interface YouTubeSong {
   videoId: string;
   title: string;
@@ -11,21 +9,31 @@ export interface YouTubeSong {
 export class YouTubeApiService {
   static async searchSongs(query: string, maxResults: number = 25): Promise<YouTubeSong[]> {
     try {
-      const { data, error } = await supabase.functions.invoke('youtube-search', {
-        body: { query, maxResults }
-      });
-
-      if (error) {
-        console.error('Error calling youtube-search function:', error);
-        throw error;
+      // Get API key from localStorage
+      const apiKey = localStorage.getItem('youtube_api_key');
+      
+      if (!apiKey) {
+        console.error('YouTube API key not found in localStorage');
+        return [];
       }
 
-      if (!data || !data.results) {
+      const response = await fetch(
+        `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoCategoryId=10&maxResults=${maxResults}&q=${encodeURIComponent(query + ' official audio')}&key=${apiKey}`
+      );
+
+      if (!response.ok) {
+        console.error('YouTube API request failed:', response.statusText);
+        return [];
+      }
+
+      const data = await response.json();
+
+      if (!data.items) {
         console.error('No results returned from YouTube search');
         return [];
       }
 
-      return data.results.map((item: any) => ({
+      return data.items.map((item: any) => ({
         videoId: item.id.videoId,
         title: item.snippet.title,
         artist: item.snippet.channelTitle,
