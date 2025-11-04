@@ -122,6 +122,65 @@ export const MusicPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     setQueue(prev => [...prev, song]);
   };
 
+  // Update Media Session API
+  useEffect(() => {
+    if ('mediaSession' in navigator && currentSong) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: currentSong.title,
+        artist: currentSong.artist,
+        album: currentSong.album || '',
+        artwork: [
+          { src: currentSong.coverUrl, sizes: '512x512', type: 'image/jpeg' },
+        ],
+      });
+
+      navigator.mediaSession.setActionHandler('play', () => {
+        if (!isPlaying) togglePlay();
+      });
+      
+      navigator.mediaSession.setActionHandler('pause', () => {
+        if (isPlaying) togglePlay();
+      });
+      
+      navigator.mediaSession.setActionHandler('previoustrack', () => {
+        previousSong();
+      });
+      
+      navigator.mediaSession.setActionHandler('nexttrack', () => {
+        nextSong();
+      });
+
+      navigator.mediaSession.setActionHandler('seekto', (details) => {
+        if (details.seekTime) {
+          seek(details.seekTime);
+        }
+      });
+    }
+  }, [currentSong, isPlaying]);
+
+  // Handle visibility change to keep playing
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && isPlaying && playerRef.current) {
+        // Try to keep playing when tab goes to background
+        setTimeout(() => {
+          if (playerRef.current && isPlaying) {
+            try {
+              playerRef.current.playVideo();
+            } catch (e) {
+              console.log('Unable to continue playback in background');
+            }
+          }
+        }, 100);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isPlaying]);
+
   // Update current time and duration
   useEffect(() => {
     if (isPlaying && playerRef.current) {
