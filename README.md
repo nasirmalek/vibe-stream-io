@@ -8,7 +8,7 @@ This Platform for all user's who wants to play songs online free.
 3. No subscription required. just signup and go with the flow!
 4. Like songs, you can like songs which you're favourites! 😍
 
-**ALERT NOTE !⚠️**
+**ALERT NOTE !⚠️** \n
 How to get an API key: 
   * Visit Google Cloud Console Create a new project (or select existing) 
   * Enable "YouTube Data API v3" Go to Credentials and create an API key Copy and paste it here.
