@@ -1,12 +1,19 @@
 import { useState, useEffect } from 'react';
-import { Play, MoreVertical, Heart } from 'lucide-react';
+import { Play, MoreVertical, Heart, Plus, ListPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Song, formatDuration } from '@/lib/mockData';
 import { useMusicPlayer } from '@/contexts/MusicPlayerContext';
 import { cn } from '@/lib/utils';
-import { likedSongsService } from '@/lib/playlistService';
+import { likedSongsService, playlistService } from '@/lib/playlistService';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { CreatePlaylistDialog } from '@/components/CreatePlaylistDialog';
 
 interface SongCardProps {
   song: Song;
@@ -15,18 +22,30 @@ interface SongCardProps {
 }
 
 export const SongCard = ({ song, showCover = true, compact = false }: SongCardProps) => {
-  const { playSong, currentSong, isPlaying, setQueue, queue } = useMusicPlayer();
+  const { playSong, currentSong, isPlaying, setQueue, queue, addToQueue } = useMusicPlayer();
   const { user } = useAuth();
   const [isLiked, setIsLiked] = useState(false);
   const [liking, setLiking] = useState(false);
+  const [playlists, setPlaylists] = useState<any[]>([]);
+  const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
 
   const isCurrentSong = currentSong?.id === song.id;
 
   useEffect(() => {
     if (user) {
       checkIfLiked();
+      loadPlaylists();
     }
   }, [song.id, user]);
+
+  const loadPlaylists = async () => {
+    try {
+      const userPlaylists = await playlistService.getUserPlaylists();
+      setPlaylists(userPlaylists);
+    } catch (error) {
+      console.error('Error loading playlists:', error);
+    }
+  };
 
   const checkIfLiked = async () => {
     try {
@@ -67,6 +86,26 @@ export const SongCard = ({ song, showCover = true, compact = false }: SongCardPr
       toast.error(error.message || 'Failed to update like status');
     } finally {
       setLiking(false);
+    }
+  };
+
+  const handleAddToQueue = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    addToQueue(song);
+    toast.success('Added to queue');
+  };
+
+  const handleAddToPlaylist = async (e: React.MouseEvent, playlistId: string) => {
+    e.stopPropagation();
+    if (!user) {
+      toast.error('Please sign in to add to playlist');
+      return;
+    }
+    try {
+      await playlistService.addSongToPlaylist(playlistId, song);
+      toast.success('Added to playlist');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to add to playlist');
     }
   };
 
@@ -111,9 +150,35 @@ export const SongCard = ({ song, showCover = true, compact = false }: SongCardPr
           >
             <Heart className={cn('w-4 h-4', isLiked && 'fill-current')} />
           </Button>
-          <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100">
-            <MoreVertical className="w-4 h-4" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100">
+                <MoreVertical className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleAddToQueue}>
+                <ListPlus className="w-4 h-4 mr-2" />
+                Add to Queue
+              </DropdownMenuItem>
+              {playlists.length > 0 ? (
+                playlists.map(playlist => (
+                  <DropdownMenuItem 
+                    key={playlist.id}
+                    onClick={(e) => handleAddToPlaylist(e, playlist.id)}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    {playlist.name}
+                  </DropdownMenuItem>
+                ))
+              ) : (
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setShowCreatePlaylist(true); }}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Playlist
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     );
@@ -154,6 +219,11 @@ export const SongCard = ({ song, showCover = true, compact = false }: SongCardPr
       </div>
       <h3 className="font-semibold truncate mb-1">{song.title}</h3>
       <p className="text-sm text-muted-foreground truncate">{song.artist}</p>
+      <CreatePlaylistDialog 
+        open={showCreatePlaylist} 
+        onOpenChange={setShowCreatePlaylist}
+        onPlaylistCreated={loadPlaylists}
+      />
     </div>
   );
 };

@@ -26,13 +26,15 @@ const NowPlaying = () => {
     previousSong,
     seek,
     queue,
+    isShuffleOn,
+    repeatMode,
+    toggleShuffle,
+    toggleRepeat,
   } = useMusicPlayer();
 
   const [lyrics, setLyrics] = useState<LyricsResponse>({ lyrics: null });
   const [isLoadingLyrics, setIsLoadingLyrics] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-  const [isShuffleOn, setIsShuffleOn] = useState(false);
-  const [repeatMode, setRepeatMode] = useState<'off' | 'all' | 'one'>('off');
 
   useEffect(() => {
     if (currentSong) {
@@ -83,14 +85,6 @@ const NowPlaying = () => {
 
   const handleSeek = (value: number[]) => {
     seek(value[0]);
-  };
-
-  const toggleRepeat = () => {
-    setRepeatMode(prev => {
-      if (prev === 'off') return 'all';
-      if (prev === 'all') return 'one';
-      return 'off';
-    });
   };
 
   if (!currentSong) {
@@ -189,7 +183,7 @@ const NowPlaying = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setIsShuffleOn(!isShuffleOn)}
+                  onClick={toggleShuffle}
                   className={cn(
                     'hover:bg-primary/10 h-9 w-9 sm:h-10 sm:w-10',
                     isShuffleOn && 'text-primary'

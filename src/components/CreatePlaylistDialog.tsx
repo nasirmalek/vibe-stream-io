@@ -18,10 +18,14 @@ import { toast } from 'sonner';
 
 interface CreatePlaylistDialogProps {
   onPlaylistCreated?: () => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export const CreatePlaylistDialog = ({ onPlaylistCreated }: CreatePlaylistDialogProps) => {
-  const [open, setOpen] = useState(false);
+export const CreatePlaylistDialog = ({ onPlaylistCreated, open: controlledOpen, onOpenChange }: CreatePlaylistDialogProps) => {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);

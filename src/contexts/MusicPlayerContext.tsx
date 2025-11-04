@@ -8,6 +8,8 @@ interface MusicPlayerContextType {
   currentTime: number;
   duration: number;
   queue: Song[];
+  isShuffleOn: boolean;
+  repeatMode: 'off' | 'all' | 'one';
   playSong: (song: Song) => void;
   togglePlay: () => void;
   nextSong: () => void;
@@ -16,6 +18,8 @@ interface MusicPlayerContextType {
   seek: (time: number) => void;
   addToQueue: (song: Song) => void;
   setQueue: (songs: Song[]) => void;
+  toggleShuffle: () => void;
+  toggleRepeat: () => void;
   playerRef: React.MutableRefObject<any>;
 }
 
@@ -43,6 +47,8 @@ export const MusicPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [queue, setQueue] = useState<Song[]>([]);
+  const [isShuffleOn, setIsShuffleOn] = useState(false);
+  const [repeatMode, setRepeatMode] = useState<'off' | 'all' | 'one'>('off');
   const playerRef = useRef<any>(null);
   const intervalRef = useRef<number | null>(null);
 
@@ -87,8 +93,22 @@ export const MusicPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const nextSong = () => {
     if (queue.length > 0 && currentSong) {
       const currentIndex = queue.findIndex(s => s.id === currentSong.id);
-      if (currentIndex < queue.length - 1) {
+      
+      if (repeatMode === 'one') {
+        playSong(currentSong);
+        return;
+      }
+      
+      if (isShuffleOn) {
+        const remainingSongs = queue.filter((_, idx) => idx !== currentIndex);
+        if (remainingSongs.length > 0) {
+          const randomSong = remainingSongs[Math.floor(Math.random() * remainingSongs.length)];
+          playSong(randomSong);
+        }
+      } else if (currentIndex < queue.length - 1) {
         playSong(queue[currentIndex + 1]);
+      } else if (repeatMode === 'all') {
+        playSong(queue[0]);
       } else {
         setIsPlaying(false);
       }
@@ -120,6 +140,18 @@ export const MusicPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   const addToQueue = (song: Song) => {
     setQueue(prev => [...prev, song]);
+  };
+
+  const toggleShuffle = () => {
+    setIsShuffleOn(prev => !prev);
+  };
+
+  const toggleRepeat = () => {
+    setRepeatMode(prev => {
+      if (prev === 'off') return 'all';
+      if (prev === 'all') return 'one';
+      return 'off';
+    });
   };
 
   // Update Media Session API
@@ -214,6 +246,8 @@ export const MusicPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         currentTime,
         duration,
         queue,
+        isShuffleOn,
+        repeatMode,
         playSong,
         togglePlay,
         nextSong,
@@ -222,6 +256,8 @@ export const MusicPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         seek,
         addToQueue,
         setQueue,
+        toggleShuffle,
+        toggleRepeat,
         playerRef,
       }}
     >
