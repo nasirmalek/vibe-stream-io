@@ -10,9 +10,9 @@ This Platform for all user's who wants to play songs online free.
 
 **ALERT NOTE !⚠️**
 How to get an API key: 
-Visit Google Cloud Console Create a new project (or select existing) 
-Enable "YouTube Data API v3" Go to Credentials and create an API key Copy and paste it here.
-[Google Console](https://console.cloud.google.com/apis/library/youtube.googleapis.com?project=exalted-summer-475718-k9)
+  * Visit Google Cloud Console Create a new project (or select existing) 
+  * Enable "YouTube Data API v3" Go to Credentials and create an API key Copy and paste it here.
+  * [Google Console](https://console.cloud.google.com/apis/library/youtube.googleapis.com?project=exalted-summer-475718-k9)
 
 Follow these steps run locally:
 
