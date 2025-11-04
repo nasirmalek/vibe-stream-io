@@ -1,26 +1,20 @@
-# Welcome to your Lovable project
+**VIBESTREAM**
+We provide Free music stream without ads Unlike Spotify ❤️.
+This Platform for all user's who wants to play songs online free.
 
-## Project info
+**Featture**
+1. Create Playlist
+2. Play songs on background
+3. No subscription required. just signup and go with the flow!
+4. Like songs, you can like songs which you're favourites! 😍
 
-**URL**: https://lovable.dev/projects/7fca7bc5-071e-416f-999e-cdeec796abda
+**ALERT NOTE !⚠️**
+How to get an API key: 
+Visit Google Cloud Console Create a new project (or select existing) 
+Enable "YouTube Data API v3" Go to Credentials and create an API key Copy and paste it here.
+[Google Console](https://console.cloud.google.com/apis/library/youtube.googleapis.com?project=exalted-summer-475718-k9)
 
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/7fca7bc5-071e-416f-999e-cdeec796abda) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Follow these steps run locally:
 
 ```sh
 # Step 1: Clone the repository using the project's Git URL.
@@ -60,14 +54,4 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/7fca7bc5-071e-416f-999e-cdeec796abda) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Create by Nasir Malek ❤️
