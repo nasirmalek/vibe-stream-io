@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDown, Heart, Shuffle, Repeat, Play, Pause, SkipBack, SkipForward, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,11 @@ import { likedSongsService } from '@/lib/playlistService';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+
+interface LyricLine {
+  time: number;
+  text: string;
+}
 
 const NowPlaying = () => {
   const navigate = useNavigate();
@@ -35,13 +40,71 @@ const NowPlaying = () => {
   const [lyrics, setLyrics] = useState<LyricsResponse>({ lyrics: null });
   const [isLoadingLyrics, setIsLoadingLyrics] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const [parsedLyrics, setParsedLyrics] = useState<LyricLine[]>([]);
+  const [activeLyricIndex, setActiveLyricIndex] = useState(-1);
+  const lyricsContainerRef = useRef<HTMLDivElement>(null);
+  const activeLineRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (currentSong) {
       loadLyrics();
       checkIfLiked();
+      setActiveLyricIndex(-1);
     }
   }, [currentSong?.id]);
+
+  useEffect(() => {
+    if (parsedLyrics.length === 0) return;
+
+    let activeIndex = -1;
+    for (let i = parsedLyrics.length - 1; i >= 0; i--) {
+      if (currentTime >= parsedLyrics[i].time) {
+        activeIndex = i;
+        break;
+      }
+    }
+    
+    setActiveLyricIndex(activeIndex);
+  }, [currentTime, parsedLyrics]);
+
+  useEffect(() => {
+    if (activeLineRef.current && lyricsContainerRef.current) {
+      const container = lyricsContainerRef.current;
+      const activeLine = activeLineRef.current;
+      
+      const containerHeight = container.clientHeight;
+      const lineTop = activeLine.offsetTop;
+      const lineHeight = activeLine.clientHeight;
+      
+      const scrollTo = lineTop - containerHeight / 2 + lineHeight / 2;
+      
+      container.scrollTo({
+        top: scrollTo,
+        behavior: 'smooth'
+      });
+    }
+  }, [activeLyricIndex]);
+
+  const parseLRC = (lrcText: string): LyricLine[] => {
+    const lines = lrcText.split('\n');
+    const parsed: LyricLine[] = [];
+    
+    lines.forEach(line => {
+      const match = line.match(/\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/);
+      if (match) {
+        const minutes = parseInt(match[1]);
+        const seconds = parseInt(match[2]);
+        const milliseconds = parseInt(match[3].padEnd(3, '0'));
+        const time = minutes * 60 + seconds + milliseconds / 1000;
+        const text = match[4].trim();
+        if (text) {
+          parsed.push({ time, text });
+        }
+      }
+    });
+    
+    return parsed.sort((a, b) => a.time - b.time);
+  };
 
   const loadLyrics = async () => {
     if (!currentSong) return;
@@ -49,6 +112,14 @@ const NowPlaying = () => {
     setIsLoadingLyrics(true);
     const result = await fetchLyrics(currentSong.artist, currentSong.title);
     setLyrics(result);
+    
+    if (result.lyrics) {
+      const parsed = parseLRC(result.lyrics);
+      setParsedLyrics(parsed);
+    } else {
+      setParsedLyrics([]);
+    }
+    
     setIsLoadingLyrics(false);
   };
 
@@ -252,15 +323,38 @@ const NowPlaying = () => {
                 </TabsList>
 
                 <TabsContent value="lyrics" className="mt-0">
-                  <ScrollArea className="h-[400px] sm:h-[500px] lg:h-[600px] rounded-lg border bg-card p-4 sm:p-6">
+                  <div className="h-[400px] sm:h-[500px] lg:h-[600px] rounded-lg border bg-card overflow-hidden">
                     {isLoadingLyrics ? (
                       <div className="flex items-center justify-center h-full">
                         <p className="text-sm sm:text-base text-muted-foreground">Loading lyrics...</p>
                       </div>
+                    ) : parsedLyrics.length > 0 ? (
+                      <div 
+                        ref={lyricsContainerRef}
+                        className="h-full overflow-y-auto px-4 sm:px-6 py-20"
+                      >
+                        {parsedLyrics.map((line, index) => (
+                          <div
+                            key={index}
+                            ref={index === activeLyricIndex ? activeLineRef : null}
+                            className={cn(
+                              "py-2 sm:py-3 transition-all duration-300 text-center cursor-pointer",
+                              index === activeLyricIndex 
+                                ? "text-primary font-semibold text-lg sm:text-2xl scale-105" 
+                                : "text-muted-foreground text-sm sm:text-base hover:text-foreground"
+                            )}
+                            onClick={() => seek(line.time)}
+                          >
+                            {line.text}
+                          </div>
+                        ))}
+                      </div>
                     ) : lyrics.lyrics ? (
-                      <pre className="whitespace-pre-wrap font-sans text-sm sm:text-base leading-relaxed">
-                        {lyrics.lyrics}
-                      </pre>
+                      <div className="h-full overflow-y-auto px-4 sm:px-6 py-4">
+                        <pre className="whitespace-pre-wrap font-sans text-sm sm:text-base leading-relaxed">
+                          {lyrics.lyrics}
+                        </pre>
+                      </div>
                     ) : (
                       <div className="flex flex-col items-center justify-center h-full text-center px-4">
                         <p className="text-sm sm:text-base text-muted-foreground mb-2">
@@ -271,7 +365,7 @@ const NowPlaying = () => {
                         </p>
                       </div>
                     )}
-                  </ScrollArea>
+                  </div>
                 </TabsContent>
 
                 <TabsContent value="queue" className="mt-0">
