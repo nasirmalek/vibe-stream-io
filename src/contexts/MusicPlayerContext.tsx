@@ -62,6 +62,28 @@ export const MusicPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
   }, []);
 
+  // Handle player state changes (auto-play next song when current ends)
+  useEffect(() => {
+    if (playerRef.current && playerRef.current.addEventListener) {
+      const onPlayerStateChange = (event: any) => {
+        // YT.PlayerState.ENDED = 0
+        if (event.data === 0) {
+          nextSong();
+        }
+        // YT.PlayerState.PLAYING = 1
+        if (event.data === 1) {
+          setIsPlaying(true);
+        }
+        // YT.PlayerState.PAUSED = 2
+        if (event.data === 2) {
+          setIsPlaying(false);
+        }
+      };
+
+      playerRef.current.addEventListener('onStateChange', onPlayerStateChange);
+    }
+  }, [queue, currentSong, isShuffleOn, repeatMode]);
+
   const getVideoId = (url: string): string => {
     const match = url.match(/[?&]v=([^&]+)/);
     return match ? match[1] : url;

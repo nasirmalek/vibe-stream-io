@@ -386,12 +386,12 @@ const NowPlaying = () => {
                           />
                           <div className="flex-1 min-w-0 overflow-hidden">
                             <p className={cn(
-                              'text-sm sm:text-base font-medium truncate block',
+                              'text-sm sm:text-base font-medium truncate',
                               currentSong.id === song.id && 'text-primary'
                             )}>
                               {song.title}
                             </p>
-                            <p className="text-xs sm:text-sm text-muted-foreground truncate block">
+                            <p className="text-xs sm:text-sm text-muted-foreground truncate">
                               {song.artist}
                             </p>
                           </div>
