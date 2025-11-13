@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { z } from 'zod';
 import logo from '@/assets/logo.png';
 import { ApiKeyDialog } from '@/components/ApiKeyDialog';
+import { GlowingEffect } from '@/components/ui/glowing-effect';
 
 const passwordSchema = z.string()
   .min(8, 'Password must be at least 8 characters')
@@ -87,8 +88,19 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="relative min-h-screen flex items-center justify-center p-4">
+      <GlowingEffect
+        spread={60}
+        blur={20}
+        glow={true}
+        disabled={false}
+        proximity={100}
+        inactiveZone={0.01}
+        borderWidth={2}
+        className="fixed inset-0 z-0"
+      />
+      
+      <div className="relative z-10 w-full max-w-md">
         <div className="text-center mb-6 sm:mb-8">
           <img src={logo} alt="VibeStream" className="h-16 sm:h-20 w-auto mx-auto mb-4" />
           <h1 className="text-2xl sm:text-3xl font-bold mb-2">Welcome to VibeStream</h1>
