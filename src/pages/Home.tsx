@@ -57,10 +57,11 @@ const Home = () => {
   return (
     <div className="relative min-h-screen pb-24 sm:pb-28 pt-16 lg:pt-0">
       <GlowingEffect
-        spread={40}
+        spread={60}
+        blur={20}
         glow={true}
-        disabled={false}
-        proximity={80}
+        disabled={true}
+        proximity={100}
         inactiveZone={0.01}
         borderWidth={2}
         className="fixed inset-0 z-0"

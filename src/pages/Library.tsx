@@ -51,16 +51,16 @@ const Library = () => {
   if (!user) {
     return (
       <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8 pt-16 lg:pt-8">
-        <GlowingEffect
-          spread={60}
-          blur={20}
-          glow={true}
-          disabled={false}
-          proximity={100}
-          inactiveZone={0.01}
-          borderWidth={2}
-          className="fixed inset-0 z-0"
-        />
+      <GlowingEffect
+        spread={60}
+        blur={20}
+        glow={true}
+        disabled={true}
+        proximity={100}
+        inactiveZone={0.01}
+        borderWidth={2}
+        className="fixed inset-0 z-0"
+      />
         <div className="relative z-10 text-center">
           <h2 className="text-xl sm:text-2xl font-bold mb-4">Sign in to view your library</h2>
           <p className="text-sm sm:text-base text-muted-foreground mb-6">

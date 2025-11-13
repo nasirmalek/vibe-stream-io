@@ -69,19 +69,10 @@ const NowPlaying = () => {
   }, [currentTime, parsedLyrics]);
 
   useEffect(() => {
-    if (activeLineRef.current && lyricsContainerRef.current) {
-      const container = lyricsContainerRef.current;
-      const activeLine = activeLineRef.current;
-      
-      const containerHeight = container.clientHeight;
-      const lineTop = activeLine.offsetTop;
-      const lineHeight = activeLine.clientHeight;
-      
-      const scrollTo = lineTop - containerHeight / 2 + lineHeight / 2;
-      
-      container.scrollTo({
-        top: scrollTo,
-        behavior: 'smooth'
+    if (activeLineRef.current) {
+      activeLineRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
       });
     }
   }, [activeLyricIndex]);
@@ -180,7 +171,7 @@ const NowPlaying = () => {
         spread={60}
         blur={20}
         glow={true}
-        disabled={false}
+        disabled={true}
         proximity={100}
         inactiveZone={0.01}
         borderWidth={2}

@@ -66,7 +66,7 @@ const Liked = () => {
         spread={60}
         blur={20}
         glow={true}
-        disabled={false}
+        disabled={true}
         proximity={100}
         inactiveZone={0.01}
         borderWidth={2}
