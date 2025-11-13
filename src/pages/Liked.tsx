@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { likedSongsService } from '@/lib/playlistService';
 import { toast } from 'sonner';
+import { GlowingEffect } from '@/components/ui/glowing-effect';
 
 const Liked = () => {
   const { user } = useAuth();
@@ -35,8 +36,18 @@ const Liked = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8 pt-16 lg:pt-8">
-        <div className="text-center">
+      <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8 pt-16 lg:pt-8">
+        <GlowingEffect
+          spread={60}
+          blur={20}
+          glow={true}
+          disabled={false}
+          proximity={100}
+          inactiveZone={0.01}
+          borderWidth={2}
+          className="fixed inset-0 z-0"
+        />
+        <div className="relative z-10 text-center">
           <h2 className="text-xl sm:text-2xl font-bold mb-4">Sign in to view your liked songs</h2>
           <p className="text-sm sm:text-base text-muted-foreground mb-6">
             Save your favorite tracks and access them anywhere
@@ -50,9 +61,19 @@ const Liked = () => {
   }
 
   return (
-    <div className="min-h-screen pb-24 sm:pb-28 pt-16 lg:pt-0">
+    <div className="relative min-h-screen pb-24 sm:pb-28 pt-16 lg:pt-0">
+      <GlowingEffect
+        spread={60}
+        blur={20}
+        glow={true}
+        disabled={false}
+        proximity={100}
+        inactiveZone={0.01}
+        borderWidth={2}
+        className="fixed inset-0 z-0"
+      />
       {/* Header */}
-      <div className="gradient-accent p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8">
+      <div className="relative z-10 gradient-accent p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
           <div className="w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 bg-primary/20 rounded-lg flex items-center justify-center">
             <Heart className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 text-accent" fill="currentColor" />
@@ -67,7 +88,7 @@ const Liked = () => {
         </div>
       </div>
 
-      <div className="px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 px-4 sm:px-6 lg:px-8">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />

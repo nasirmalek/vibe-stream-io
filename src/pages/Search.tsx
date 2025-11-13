@@ -6,6 +6,7 @@ import { Song } from '@/lib/mockData';
 import { YouTubeApiService } from '@/services/youtubeApi';
 import { adaptYouTubeSongsToSongs } from '@/lib/youtubeSongAdapter';
 import { toast } from 'sonner';
+import { GlowingEffect } from '@/components/ui/glowing-effect';
 
 const Search = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -57,8 +58,18 @@ const Search = () => {
   }, [searchQuery]);
 
   return (
-    <div className="min-h-screen p-4 sm:p-6 lg:p-8 pb-24 sm:pb-28 pt-16 lg:pt-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="relative min-h-screen p-4 sm:p-6 lg:p-8 pb-24 sm:pb-28 pt-16 lg:pt-8">
+      <GlowingEffect
+        spread={60}
+        blur={20}
+        glow={true}
+        disabled={false}
+        proximity={100}
+        inactiveZone={0.01}
+        borderWidth={2}
+        className="fixed inset-0 z-0"
+      />
+      <div className="relative z-10 max-w-7xl mx-auto">
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 sm:mb-8">Search</h1>
 
         <div className="relative mb-8 sm:mb-12">

@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { playlistService, Playlist } from '@/lib/playlistService';
 import { toast } from 'sonner';
 import { CreatePlaylistDialog } from '@/components/CreatePlaylistDialog';
+import { GlowingEffect } from '@/components/ui/glowing-effect';
 
 const Library = () => {
   const { user } = useAuth();
@@ -49,8 +50,18 @@ const Library = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8 pt-16 lg:pt-8">
-        <div className="text-center">
+      <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8 pt-16 lg:pt-8">
+        <GlowingEffect
+          spread={60}
+          blur={20}
+          glow={true}
+          disabled={false}
+          proximity={100}
+          inactiveZone={0.01}
+          borderWidth={2}
+          className="fixed inset-0 z-0"
+        />
+        <div className="relative z-10 text-center">
           <h2 className="text-xl sm:text-2xl font-bold mb-4">Sign in to view your library</h2>
           <p className="text-sm sm:text-base text-muted-foreground mb-6">
             Create playlists, save your favorite songs, and more
@@ -64,8 +75,18 @@ const Library = () => {
   }
 
   return (
-    <div className="min-h-screen p-4 sm:p-6 lg:p-8 pb-24 sm:pb-28 pt-16 lg:pt-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="relative min-h-screen p-4 sm:p-6 lg:p-8 pb-24 sm:pb-28 pt-16 lg:pt-8">
+      <GlowingEffect
+        spread={60}
+        blur={20}
+        glow={true}
+        disabled={false}
+        proximity={100}
+        inactiveZone={0.01}
+        borderWidth={2}
+        className="fixed inset-0 z-0"
+      />
+      <div className="relative z-10 max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">Your Library</h1>
           <CreatePlaylistDialog onPlaylistCreated={loadPlaylists} />

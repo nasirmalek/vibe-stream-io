@@ -12,6 +12,7 @@ import { likedSongsService } from '@/lib/playlistService';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { GlowingEffect } from '@/components/ui/glowing-effect';
 
 interface LyricLine {
   time: number;
@@ -174,9 +175,19 @@ const NowPlaying = () => {
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary/20 via-background to-background pb-20 sm:pb-24">
+    <div className="relative min-h-screen bg-gradient-to-b from-primary/20 via-background to-background pb-20 sm:pb-24">
+      <GlowingEffect
+        spread={60}
+        blur={20}
+        glow={true}
+        disabled={false}
+        proximity={100}
+        inactiveZone={0.01}
+        borderWidth={2}
+        className="fixed inset-0 z-0"
+      />
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-lg border-b border-border">
+      <div className="relative z-10 sticky top-0 bg-background/95 backdrop-blur-lg border-b border-border">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
           <Button
             variant="ghost"
@@ -197,7 +208,7 @@ const NowPlaying = () => {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
+      <div className="relative z-10 container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
             {/* Left: Album Art & Controls */}
