@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { YouTubeApiService } from '@/services/youtubeApi';
 import { adaptYouTubeSongsToSongs } from '@/lib/youtubeSongAdapter';
 import { toast } from 'sonner';
+import { GlowingEffect } from '@/components/ui/glowing-effect';
 
 const Home = () => {
   const { user, signOut } = useAuth();
@@ -54,9 +55,19 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen pb-24 sm:pb-28 pt-16 lg:pt-0">
+    <div className="relative min-h-screen pb-24 sm:pb-28 pt-16 lg:pt-0">
+      <GlowingEffect
+        spread={40}
+        glow={true}
+        disabled={false}
+        proximity={80}
+        inactiveZone={0.01}
+        borderWidth={2}
+        className="fixed inset-0 z-0"
+      />
+      
       {/* Header */}
-      <div className="gradient-primary p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8">
+      <div className="relative z-10 gradient-primary p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8">
         <div className="flex items-center justify-between mb-4 sm:mb-6">
           <div>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-1 sm:mb-2">{getGreeting()}</h1>
@@ -100,11 +111,11 @@ const Home = () => {
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-20">
+        <div className="relative z-10 flex items-center justify-center py-20">
           <Loader2 className="w-12 h-12 animate-spin text-primary" />
         </div>
       ) : (
-        <div className="px-4 sm:px-6 lg:px-8">
+        <div className="relative z-10 px-4 sm:px-6 lg:px-8">
           {/* Featured Section */}
           <section className="mb-8 sm:mb-12">
             <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Featured Tracks</h2>
